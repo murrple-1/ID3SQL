@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 using TagLib;
 
-namespace Searcher
+namespace ID3SQL
 {
     public class Program
     {

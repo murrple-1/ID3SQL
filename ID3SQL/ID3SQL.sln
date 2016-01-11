@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Searcher", "Searcher\Searcher.csproj", "{393614BD-0419-4630-9A7D-A3448BB9D170}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ID3SQL", "ID3SQL\ID3SQL.csproj", "{393614BD-0419-4630-9A7D-A3448BB9D170}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
