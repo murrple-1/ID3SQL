@@ -5,55 +5,79 @@ using System.Text.RegularExpressions;
 
 using TagLib;
 
+using Irony.Parsing;
+
 namespace ID3SQL
 {
     public class Program
     {
-        private static Regex musicFileRegex;
+        private static string DefaultFileRegex()
+        {
+            return @".*\.(wma|mp3|m4a)";
+        }
+
+        private static string DefaultDirectoryPath()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+        }
 
         public static void Main(string[] args)
         {
-            musicFileRegex = new Regex(@".*\.(wma|mp3|m4a)");
+            CommandLineOptions options = new CommandLineOptions();
 
-            ICollection<string> musicFiles = new List<string>();
-
-            DirectorySearch(@"D:\Users\Roadrunner\Music\", musicFiles);
-
-            foreach (string musicFile in musicFiles)
+            try
             {
-                try
+                if (CommandLine.Parser.Default.ParseArguments(args, options))
                 {
-                    using (TagLib.File file = TagLib.File.Create(musicFile))
-                    {
-                        if (file.Tag.Disc < 1 || file.Tag.DiscCount < 1)
-                        {
-                            file.Tag.Disc = 1;
-                            file.Tag.DiscCount = 1;
-                            file.Save();
+                    Regex fileRegex = new Regex(options.FileRegex ?? DefaultFileRegex());
+                    string startDirectory = options.Directory ?? DefaultDirectoryPath();
 
-                            System.Console.WriteLine("{0} has been updated", musicFile);
+                    string statement = options.Statement;
+
+                    Grammar grammar = new ID3SQLGrammar();
+                    LanguageData languageData = new LanguageData(grammar);
+                    Parser parser = new Parser(languageData);
+                    ParseTree parseTree = parser.Parse(statement);
+                    ParseTreeNode root = parseTree.Root;
+
+                    ICollection<string> tagFilePaths = new List<string>();
+                    BuildFileList(startDirectory, tagFilePaths, fileRegex);
+
+                    foreach (string tagFilePath in tagFilePaths)
+                    {
+                        using (TagLib.File file = TagLib.File.Create(tagFilePath))
+                        {
+                            // TODO
                         }
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    System.Console.WriteLine("{0} could not be written to. Error: {1}", musicFile, e);
+                    Console.Write(options.GetUsage());
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Unknown error has occured");
+                if(options.Verbose)
+                {
+                    Console.WriteLine(ex);
                 }
             }
         }
 
-        private static void DirectorySearch(string directoryPath, ICollection<string> musicFiles)
+        private static void BuildFileList(string directoryPath, ICollection<string> tagFilePaths, Regex fileRegex)
         {
-            foreach (string subDirectory in Directory.GetDirectories(directoryPath))
+            foreach (string subDirectoryPath in Directory.GetDirectories(directoryPath))
             {
-                DirectorySearch(subDirectory, musicFiles);
+                BuildFileList(subDirectoryPath, tagFilePaths, fileRegex);
             }
 
-            foreach (string file in Directory.GetFiles(directoryPath))
+            foreach (string filePath in Directory.GetFiles(directoryPath))
             {
-                if (musicFileRegex.IsMatch(file))
+                if (fileRegex.IsMatch(filePath))
                 {
-                    musicFiles.Add(file);
+                    tagFilePaths.Add(filePath);
                 }
             }
         }
