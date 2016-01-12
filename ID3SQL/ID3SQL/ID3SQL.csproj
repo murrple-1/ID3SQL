@@ -52,6 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="ExecutionPlan.cs" />
+    <Compile Include="ExecutionPlanOptions.cs" />
+    <Compile Include="ID3SQLException.cs" />
     <Compile Include="ID3SQLGrammar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

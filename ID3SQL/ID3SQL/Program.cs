@@ -29,31 +29,52 @@ namespace ID3SQL
             {
                 if (CommandLine.Parser.Default.ParseArguments(args, options))
                 {
-                    Regex fileRegex = new Regex(options.FileRegex ?? DefaultFileRegex());
+                    Regex fileRegex;
+                    try
+                    {
+                        fileRegex = new Regex(options.FileRegex ?? DefaultFileRegex());
+                    }
+                    catch(Exception ex)
+                    {
+                        throw new ID3SQLException("Error parsing fileRegex", ex);
+                    }
+
                     string startDirectory = options.Directory ?? DefaultDirectoryPath();
 
                     string statement = options.Statement;
 
-                    Grammar grammar = new ID3SQLGrammar();
-                    LanguageData languageData = new LanguageData(grammar);
-                    Parser parser = new Parser(languageData);
-                    ParseTree parseTree = parser.Parse(statement);
-                    ParseTreeNode root = parseTree.Root;
+                    Action<IEnumerable<string>, ExecutionPlanOptions> executionPlan = ExecutionPlan.GenerateExecutionPlan(statement);
 
                     ICollection<string> tagFilePaths = new List<string>();
-                    BuildFileList(startDirectory, tagFilePaths, fileRegex);
-
-                    foreach (string tagFilePath in tagFilePaths)
+                    try
                     {
-                        using (TagLib.File file = TagLib.File.Create(tagFilePath))
-                        {
-                            // TODO
-                        }
+                        BuildFileList(startDirectory, tagFilePaths, fileRegex);
                     }
+                    catch(Exception ex)
+                    {
+                        throw new ID3SQLException(string.Format("Error building file list from startDirectory '{0}'", startDirectory), ex);
+                    }
+
+                    ExecutionPlanOptions executionPlanOptions = new ExecutionPlanOptions()
+                    {
+                        Recycle = options.Recycle,
+                        DryRun = options.DryRun,
+                        Verbose = options.Verbose
+                    };
+
+                    executionPlan.Invoke(tagFilePaths, executionPlanOptions);
                 }
                 else
                 {
                     Console.Write(options.GetUsage());
+                }
+            }
+            catch(ID3SQLException ex)
+            {
+                Console.WriteLine(ex.Message);
+                if(options.Verbose)
+                {
+                    Console.Write(ex);
                 }
             }
             catch(Exception ex)
