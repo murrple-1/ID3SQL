@@ -27,7 +27,6 @@ namespace ID3SQL
             Terminal SET = ToTerm("SET");
             Terminal DELETE = ToTerm("DELETE");
             Terminal SELECT = ToTerm("SELECT");
-            Terminal BY = ToTerm("BY");
 
             NonTerminal Id = new NonTerminal("Id");
             NonTerminal stmt = new NonTerminal("stmt");
@@ -39,7 +38,6 @@ namespace ID3SQL
             NonTerminal assignment = new NonTerminal("assignment");
             NonTerminal expression = new NonTerminal("expression");
             NonTerminal exprList = new NonTerminal("exprList");
-            NonTerminal selRestrOpt = new NonTerminal("selRestrOpt");
             NonTerminal selList = new NonTerminal("selList");
             NonTerminal columnItemList = new NonTerminal("columnItemList");
             NonTerminal tuple = new NonTerminal("tuple");
@@ -49,19 +47,21 @@ namespace ID3SQL
             NonTerminal binExpr = new NonTerminal("binExpr");
             NonTerminal binOp = new NonTerminal("binOp");
             NonTerminal betweenExpr = new NonTerminal("betweenExpr");
-            NonTerminal parSelectStmt = new NonTerminal("parSelectStmt");
             NonTerminal notOpt = new NonTerminal("notOpt");
-            NonTerminal funCall = new NonTerminal("funCall");
-            NonTerminal funArgs = new NonTerminal("funArgs");
             NonTerminal inStmt = new NonTerminal("inStmt");
 
-            //BNF Rules
             this.Root = stmt;
 
             //ID
             Id.Rule = MakePlusRule(Id, dot, Id_simple);
 
             stmt.Rule = selectStmt | updateStmt | deleteStmt;
+
+            //Select stmt
+            selectStmt.Rule = SELECT + selList + whereClauseOpt;
+            selList.Rule = columnItemList | "*";
+            columnItemList.Rule = MakePlusRule(columnItemList, comma, Id);
+            whereClauseOpt.Rule = Empty | "WHERE" + expression;
 
             //Update stmt
             updateStmt.Rule = UPDATE + SET + assignList + whereClauseOpt;
@@ -70,20 +70,12 @@ namespace ID3SQL
 
             //Delete stmt
             deleteStmt.Rule = DELETE + whereClauseOpt;
-
-            //Select stmt
-            selectStmt.Rule = SELECT + selRestrOpt + selList + whereClauseOpt;
-            selRestrOpt.Rule = Empty | "ALL" | "DISTINCT";
-            selList.Rule = columnItemList | "*";
-            columnItemList.Rule = MakePlusRule(columnItemList, comma, Id);
-            whereClauseOpt.Rule = Empty | "WHERE" + expression;
  
             //Expression
             exprList.Rule = MakePlusRule(exprList, comma, expression);
-            expression.Rule = term | unExpr | binExpr;// | betweenExpr; //-- BETWEEN doesn't work - yet; brings a few parsing conflicts 
-            term.Rule = Id | string_literal | number | funCall | tuple | parSelectStmt;// | inStmt;
+            expression.Rule = term | unExpr | binExpr;
+            term.Rule = Id | string_literal | number | tuple;
             tuple.Rule = "(" + exprList + ")";
-            parSelectStmt.Rule = "(" + selectStmt + ")"; 
             unExpr.Rule = unOp + term;
             unOp.Rule = NOT | "+" | "-" | "~"; 
             binExpr.Rule = expression + binOp + expression;
@@ -93,9 +85,6 @@ namespace ID3SQL
                         | "AND" | "OR" | "LIKE" | NOT + "LIKE" | "IN" | NOT + "IN" ; 
             betweenExpr.Rule = expression + notOpt + "BETWEEN" + expression + "AND" + expression;
             notOpt.Rule = Empty | NOT;
-            //funCall covers some psedo-operators and special forms like ANY(...), SOME(...), ALL(...), EXISTS(...), IN(...)
-            funCall.Rule = Id + "(" + funArgs  + ")";
-            funArgs.Rule = selectStmt | exprList;
             inStmt.Rule = expression + "IN" + "(" + exprList + ")";
 
             //Operators
