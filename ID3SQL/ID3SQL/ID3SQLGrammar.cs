@@ -15,94 +15,119 @@ namespace ID3SQL
             return parseTree;
         }
 
+        public const string NumberTermName = "number";
+        public const string StringLiteralTermName = "string";
+        public const string IdTermName = "id";
+
+        public const string CommaKeyTermText = ",";
+        public const string NotKeyTermText = "NOT";
+        public const string UpdateKeyTermText = "UPDATE";
+        public const string SetKeyTermText = "SET";
+        public const string DeleteKeyTermText = "DELETE";
+        public const string SelectKeyTermText = "SELECT";
+
+        public const string StatementNonTermName = "statement";
+        public const string SelectStatementNonTermName = "selectStatement";
+        public const string UpdateStatementNonTermName = "updateStatement";
+        public const string DeleteStatementNonTermName = "deleteStatement";
+        public const string AssignListNonTermName = "assignList";
+        public const string WhereClauseNonTermName = "whereClause";
+        public const string AssignmentNonTermName = "assignment";
+        public const string ExpressionNonTermName = "expression";
+        public const string ExpressionListNonTermName = "expressionList";
+        public const string SelectListNonTermName = "selectList";
+        public const string ColumnItemListNonTermName = "columnItemList";
+        public const string TermNonTermName = "term";
+        public const string UnaryExpressionNonTermName = "unaryExpression";
+        public const string UnaryOperatorNonTermName = "unaryOperand";
+        public const string BinaryExpressionNonTermName = "binaryExpression";
+        public const string BinaryOperatorNonTermName = "binaryOperand";
+        public const string BetweenExpressionNonTermName = "betweenExpression";
+        public const string NotOperatorNonTermName = "notOperand";
+        public const string InStatementNonTermName = "inStatement";
+
         private ID3SQLGrammar() : base(false)
         {
-            Terminal number = new NumberLiteral("number");
-            Terminal string_literal = new StringLiteral("string", "'", StringOptions.AllowsDoubledQuote);
-            Terminal Id_simple = TerminalFactory.CreateSqlExtIdentifier(this, "id_simple"); //covers normal identifiers (abc) and quoted id's ([abc d], "abc d")
-            Terminal comma = ToTerm(",");
-            Terminal dot = ToTerm(".");
-            Terminal NOT = ToTerm("NOT");
-            Terminal UPDATE = ToTerm("UPDATE");
-            Terminal SET = ToTerm("SET");
-            Terminal DELETE = ToTerm("DELETE");
-            Terminal SELECT = ToTerm("SELECT");
+            Terminal numberTerm = new NumberLiteral(NumberTermName);
+            Terminal stringLiteralTerm = new StringLiteral(StringLiteralTermName, "'", StringOptions.AllowsDoubledQuote);
+            Terminal idTerm = TerminalFactory.CreateSqlExtIdentifier(this, IdTermName); //covers normal identifiers (abc) and quoted id's ([abc d], "abc d")
 
-            NonTerminal Id = new NonTerminal("Id");
-            NonTerminal stmt = new NonTerminal("stmt");
-            NonTerminal selectStmt = new NonTerminal("selectStmt");
-            NonTerminal updateStmt = new NonTerminal("updateStmt");
-            NonTerminal deleteStmt = new NonTerminal("deleteStmt");
-            NonTerminal assignList = new NonTerminal("assignList");
-            NonTerminal whereClauseOpt = new NonTerminal("whereClauseOpt");
-            NonTerminal assignment = new NonTerminal("assignment");
-            NonTerminal expression = new NonTerminal("expression");
-            NonTerminal exprList = new NonTerminal("exprList");
-            NonTerminal selList = new NonTerminal("selList");
-            NonTerminal columnItemList = new NonTerminal("columnItemList");
-            NonTerminal tuple = new NonTerminal("tuple");
-            NonTerminal term = new NonTerminal("term");
-            NonTerminal unExpr = new NonTerminal("unExpr");
-            NonTerminal unOp = new NonTerminal("unOp");
-            NonTerminal binExpr = new NonTerminal("binExpr");
-            NonTerminal binOp = new NonTerminal("binOp");
-            NonTerminal betweenExpr = new NonTerminal("betweenExpr");
-            NonTerminal notOpt = new NonTerminal("notOpt");
-            NonTerminal inStmt = new NonTerminal("inStmt");
+            KeyTerm commaKeyTerm = ToTerm(CommaKeyTermText);
+            KeyTerm notKeyTerm = ToTerm(NotKeyTermText);
+            KeyTerm updateKeyTerm = ToTerm(UpdateKeyTermText);
+            KeyTerm setKeyTerm = ToTerm(SetKeyTermText);
+            KeyTerm deleteKeyTerm = ToTerm(DeleteKeyTermText);
+            KeyTerm selectKeyTerm = ToTerm(SelectKeyTermText);
 
-            this.Root = stmt;
+            NonTerminal statementNonTerm = new NonTerminal(StatementNonTermName);
+            NonTerminal selectStatementNonTerm = new NonTerminal(SelectStatementNonTermName);
+            NonTerminal updateStatementNonTerm = new NonTerminal(UpdateStatementNonTermName);
+            NonTerminal deleteStatementNonTerm = new NonTerminal(DeleteStatementNonTermName);
+            NonTerminal assignListNonTerm = new NonTerminal(AssignListNonTermName);
+            NonTerminal whereClauseNonTerm = new NonTerminal(WhereClauseNonTermName);
+            NonTerminal assignmentNonTerm = new NonTerminal(AssignmentNonTermName);
+            NonTerminal expressionNonTerm = new NonTerminal(ExpressionNonTermName);
+            NonTerminal expressionListNonTerm = new NonTerminal(ExpressionListNonTermName);
+            NonTerminal selectListNonTerm = new NonTerminal(SelectListNonTermName);
+            NonTerminal columnItemListNonTerm = new NonTerminal(ColumnItemListNonTermName);
+            NonTerminal termNonTerm = new NonTerminal(TermNonTermName);
+            NonTerminal unaryExpressionNonTerm = new NonTerminal(UnaryExpressionNonTermName);
+            NonTerminal unaryOperatorNonTerm = new NonTerminal(UnaryOperatorNonTermName);
+            NonTerminal binaryExpressionNonTerm = new NonTerminal(BinaryExpressionNonTermName);
+            NonTerminal binaryOperatorNonTerm = new NonTerminal(BinaryOperatorNonTermName);
+            NonTerminal betweenExpressionNonTerm = new NonTerminal(BetweenExpressionNonTermName);
+            NonTerminal notOperatorNonTerm = new NonTerminal(NotOperatorNonTermName);
+            NonTerminal inStatementNonTerm = new NonTerminal(InStatementNonTermName);
 
-            //ID
-            Id.Rule = MakePlusRule(Id, dot, Id_simple);
+            this.Root = statementNonTerm;
 
-            stmt.Rule = selectStmt | updateStmt | deleteStmt;
+            statementNonTerm.Rule = selectStatementNonTerm | updateStatementNonTerm | deleteStatementNonTerm;
 
             //Select stmt
-            selectStmt.Rule = SELECT + selList + whereClauseOpt;
-            selList.Rule = columnItemList | "*";
-            columnItemList.Rule = MakePlusRule(columnItemList, comma, Id);
-            whereClauseOpt.Rule = Empty | "WHERE" + expression;
+            selectStatementNonTerm.Rule = selectKeyTerm + selectListNonTerm + whereClauseNonTerm;
+            selectListNonTerm.Rule = columnItemListNonTerm | "*";
+            columnItemListNonTerm.Rule = MakePlusRule(columnItemListNonTerm, commaKeyTerm, idTerm);
+            whereClauseNonTerm.Rule = Empty | "WHERE" + expressionNonTerm;
 
             //Update stmt
-            updateStmt.Rule = UPDATE + SET + assignList + whereClauseOpt;
-            assignList.Rule = MakePlusRule(assignList, comma, assignment);
-            assignment.Rule = Id + "=" + expression;
+            updateStatementNonTerm.Rule = updateKeyTerm + setKeyTerm + assignListNonTerm + whereClauseNonTerm;
+            assignListNonTerm.Rule = MakePlusRule(assignListNonTerm, commaKeyTerm, assignmentNonTerm);
+            assignmentNonTerm.Rule = idTerm + "=" + expressionNonTerm;
 
             //Delete stmt
-            deleteStmt.Rule = DELETE + whereClauseOpt;
+            deleteStatementNonTerm.Rule = deleteKeyTerm + whereClauseNonTerm;
  
             //Expression
-            exprList.Rule = MakePlusRule(exprList, comma, expression);
-            expression.Rule = term | unExpr | binExpr;
-            term.Rule = Id | string_literal | number | tuple;
-            tuple.Rule = "(" + exprList + ")";
-            unExpr.Rule = unOp + term;
-            unOp.Rule = NOT | "+" | "-" | "~"; 
-            binExpr.Rule = expression + binOp + expression;
-            binOp.Rule = ToTerm("+") | "-" | "*" | "/" | "%" //arithmetic
-                        | "&" | "|" | "^"                     //bit
-                        | "=" | ">" | "<" | ">=" | "<=" | "<>" | "!=" | "!<" | "!>"
-                        | "AND" | "OR" | "LIKE" | NOT + "LIKE" | "IN" | NOT + "IN" ; 
-            betweenExpr.Rule = expression + notOpt + "BETWEEN" + expression + "AND" + expression;
-            notOpt.Rule = Empty | NOT;
-            inStmt.Rule = expression + "IN" + "(" + exprList + ")";
+            expressionListNonTerm.Rule = MakePlusRule(expressionListNonTerm, commaKeyTerm, expressionNonTerm);
+            expressionNonTerm.Rule = termNonTerm | unaryExpressionNonTerm | binaryExpressionNonTerm;
+            termNonTerm.Rule = idTerm | stringLiteralTerm | numberTerm;
+            unaryExpressionNonTerm.Rule = unaryOperatorNonTerm + termNonTerm;
+            unaryOperatorNonTerm.Rule = notKeyTerm | ToTerm("+") | ToTerm("-") | ToTerm("~");
+            binaryExpressionNonTerm.Rule = expressionNonTerm + binaryOperatorNonTerm + expressionNonTerm;
+            binaryOperatorNonTerm.Rule = ToTerm("+") | ToTerm("-") | ToTerm("*") | ToTerm("/") | ToTerm("%") //arithmetic
+                        | ToTerm("&") | ToTerm("|") | ToTerm("^")                     //bit
+                        | ToTerm("=") | ToTerm(">") | ToTerm("<") | ToTerm(">=") | ToTerm("<=") | ToTerm("!=")
+                        | ToTerm("AND") | ToTerm("OR") | ToTerm("LIKE") | notKeyTerm + ToTerm("LIKE") | ToTerm("IN") | notKeyTerm + ToTerm("IN");
+            betweenExpressionNonTerm.Rule = expressionNonTerm + notOperatorNonTerm + "BETWEEN" + expressionNonTerm + "AND" + expressionNonTerm;
+            notOperatorNonTerm.Rule = Empty | notKeyTerm;
+            inStatementNonTerm.Rule = expressionNonTerm + "IN" + "(" + expressionListNonTerm + ")";
 
             //Operators
-            RegisterOperators(10, "*", "/", "%"); 
+            RegisterOperators(10, "*", "/", "%");
             RegisterOperators(9, "+", "-");
             RegisterOperators(8, "=", ">", "<", ">=", "<=", "<>", "!=", "!<", "!>", "LIKE", "IN");
             RegisterOperators(7, "^", "&", "|");
-            RegisterOperators(6, NOT); 
+            RegisterOperators(6, notKeyTerm);
             RegisterOperators(5, "AND");
             RegisterOperators(4, "OR");
 
-            MarkPunctuation(",", "(", ")", ";");
+            MarkPunctuation(",", "(", ")");
             //Note: we cannot declare binOp as transient because it includes operators "NOT LIKE", "NOT IN" consisting of two tokens. 
             // Transient non-terminals cannot have more than one non-punctuation child nodes.
             // Instead, we set flag InheritPrecedence on binOp , so that it inherits precedence value from it's children, and this precedence is used
             // in conflict resolution when binOp node is sitting on the stack
-            base.MarkTransient(stmt, term, expression, unOp, tuple);
-            binOp.SetFlag(TermFlags.InheritPrecedence); 
+            base.MarkTransient(statementNonTerm, termNonTerm, expressionNonTerm, unaryOperatorNonTerm);
+            binaryOperatorNonTerm.SetFlag(TermFlags.InheritPrecedence);
         }
     }
 }

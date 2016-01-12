@@ -42,17 +42,17 @@ namespace ID3SQL
             Action<File, string, ExecutionPlanOptions> action;
             switch (rootNode.Term.Name)
             {
-                case "selectStmt":
+                case ID3SQLGrammar.SelectStatementNonTermName:
                     {
                         action = ToSelectAction();
                         break;
                     }
-                case "updateStmt":
+                case ID3SQLGrammar.UpdateStatementNonTermName:
                     {
                         action = ToUpdateAction();
                         break;
                     }
-                case "deleteStmt":
+                case ID3SQLGrammar.DeleteStatementNonTermName:
                     {
                         action = ToDeleteAction();
                         break;
@@ -71,17 +71,17 @@ namespace ID3SQL
             ParseTreeNode whereNode;
             switch (rootNode.Term.Name)
             {
-                case "selectStmt":
+                case ID3SQLGrammar.SelectStatementNonTermName:
                     {
                         whereNode = rootNode.ChildNodes[2];
                         break;
                     }
-                case "updateStmt":
+                case ID3SQLGrammar.UpdateStatementNonTermName:
                     {
                         whereNode = rootNode.ChildNodes[3];
                         break;
                     }
-                case "deleteStmt":
+                case ID3SQLGrammar.DeleteStatementNonTermName:
                     {
                         whereNode = rootNode.ChildNodes[1];
                         break;
