@@ -59,6 +59,7 @@
     <Compile Include="ID3SQLGrammar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TagFunctionManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

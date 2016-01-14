@@ -42,7 +42,6 @@ namespace ID3SQL
         public const string UnaryOperatorNonTermName = "unaryOperand";
         public const string BinaryExpressionNonTermName = "binaryExpression";
         public const string BinaryOperatorNonTermName = "binaryOperand";
-        public const string BetweenExpressionNonTermName = "betweenExpression";
         public const string NotOperatorNonTermName = "notOperand";
         public const string InStatementNonTermName = "inStatement";
 
@@ -51,13 +50,6 @@ namespace ID3SQL
             Terminal numberTerm = new NumberLiteral(NumberTermName);
             Terminal stringLiteralTerm = new StringLiteral(StringLiteralTermName, "'", StringOptions.AllowsDoubledQuote);
             Terminal idTerm = TerminalFactory.CreateSqlExtIdentifier(this, IdTermName); //covers normal identifiers (abc) and quoted id's ([abc d], "abc d")
-
-            KeyTerm commaKeyTerm = ToTerm(CommaKeyTermText);
-            KeyTerm notKeyTerm = ToTerm(NotKeyTermText);
-            KeyTerm updateKeyTerm = ToTerm(UpdateKeyTermText);
-            KeyTerm setKeyTerm = ToTerm(SetKeyTermText);
-            KeyTerm deleteKeyTerm = ToTerm(DeleteKeyTermText);
-            KeyTerm selectKeyTerm = ToTerm(SelectKeyTermText);
 
             NonTerminal statementNonTerm = new NonTerminal(StatementNonTermName);
             NonTerminal selectStatementNonTerm = new NonTerminal(SelectStatementNonTermName);
@@ -75,7 +67,6 @@ namespace ID3SQL
             NonTerminal unaryOperatorNonTerm = new NonTerminal(UnaryOperatorNonTermName);
             NonTerminal binaryExpressionNonTerm = new NonTerminal(BinaryExpressionNonTermName);
             NonTerminal binaryOperatorNonTerm = new NonTerminal(BinaryOperatorNonTermName);
-            NonTerminal betweenExpressionNonTerm = new NonTerminal(BetweenExpressionNonTermName);
             NonTerminal notOperatorNonTerm = new NonTerminal(NotOperatorNonTermName);
             NonTerminal inStatementNonTerm = new NonTerminal(InStatementNonTermName);
 
@@ -83,33 +74,30 @@ namespace ID3SQL
 
             statementNonTerm.Rule = selectStatementNonTerm | updateStatementNonTerm | deleteStatementNonTerm;
 
-            //Select stmt
-            selectStatementNonTerm.Rule = selectKeyTerm + selectListNonTerm + whereClauseNonTerm;
+            //Select statement
+            selectStatementNonTerm.Rule = ToTerm("SELECT") + selectListNonTerm + whereClauseNonTerm;
             selectListNonTerm.Rule = columnItemListNonTerm | "*";
-            columnItemListNonTerm.Rule = MakePlusRule(columnItemListNonTerm, commaKeyTerm, idTerm);
+            columnItemListNonTerm.Rule = MakePlusRule(columnItemListNonTerm, ToTerm(","), idTerm);
             whereClauseNonTerm.Rule = Empty | "WHERE" + expressionNonTerm;
 
-            //Update stmt
-            updateStatementNonTerm.Rule = updateKeyTerm + setKeyTerm + assignListNonTerm + whereClauseNonTerm;
-            assignListNonTerm.Rule = MakePlusRule(assignListNonTerm, commaKeyTerm, assignmentNonTerm);
+            //Update statement
+            updateStatementNonTerm.Rule = ToTerm("UPDATE") + "SET" + assignListNonTerm + whereClauseNonTerm;
+            assignListNonTerm.Rule = MakePlusRule(assignListNonTerm, ToTerm(","), assignmentNonTerm);
             assignmentNonTerm.Rule = idTerm + "=" + expressionNonTerm;
 
-            //Delete stmt
-            deleteStatementNonTerm.Rule = deleteKeyTerm + whereClauseNonTerm;
+            //Delete statement
+            deleteStatementNonTerm.Rule = ToTerm("DELETE") + whereClauseNonTerm;
  
             //Expression
-            expressionListNonTerm.Rule = MakePlusRule(expressionListNonTerm, commaKeyTerm, expressionNonTerm);
+            expressionListNonTerm.Rule = MakePlusRule(expressionListNonTerm, ToTerm(","), expressionNonTerm);
             expressionNonTerm.Rule = termNonTerm | unaryExpressionNonTerm | binaryExpressionNonTerm;
             termNonTerm.Rule = idTerm | stringLiteralTerm | numberTerm;
             unaryExpressionNonTerm.Rule = unaryOperatorNonTerm + termNonTerm;
-            unaryOperatorNonTerm.Rule = notKeyTerm | ToTerm("+") | ToTerm("-") | ToTerm("~");
+            unaryOperatorNonTerm.Rule = ToTerm("NOT") | "-";
             binaryExpressionNonTerm.Rule = expressionNonTerm + binaryOperatorNonTerm + expressionNonTerm;
-            binaryOperatorNonTerm.Rule = ToTerm("+") | ToTerm("-") | ToTerm("*") | ToTerm("/") | ToTerm("%") //arithmetic
-                        | ToTerm("&") | ToTerm("|") | ToTerm("^")                     //bit
-                        | ToTerm("=") | ToTerm(">") | ToTerm("<") | ToTerm(">=") | ToTerm("<=") | ToTerm("!=")
-                        | ToTerm("AND") | ToTerm("OR") | ToTerm("LIKE") | notKeyTerm + ToTerm("LIKE") | ToTerm("IN") | notKeyTerm + ToTerm("IN");
-            betweenExpressionNonTerm.Rule = expressionNonTerm + notOperatorNonTerm + "BETWEEN" + expressionNonTerm + "AND" + expressionNonTerm;
-            notOperatorNonTerm.Rule = Empty | notKeyTerm;
+            binaryOperatorNonTerm.Rule = ToTerm("=") | ">" | "<" | ">=" | "<=" | "!="
+                        | "AND" | "OR" | "LIKE" | "NOT" + "LIKE" | "IN" | "NOT" + "IN";
+            notOperatorNonTerm.Rule = Empty | "NOT";
             inStatementNonTerm.Rule = expressionNonTerm + "IN" + "(" + expressionListNonTerm + ")";
 
             //Operators
@@ -117,7 +105,7 @@ namespace ID3SQL
             RegisterOperators(9, "+", "-");
             RegisterOperators(8, "=", ">", "<", ">=", "<=", "<>", "!=", "!<", "!>", "LIKE", "IN");
             RegisterOperators(7, "^", "&", "|");
-            RegisterOperators(6, notKeyTerm);
+            RegisterOperators(6, "NOT");
             RegisterOperators(5, "AND");
             RegisterOperators(4, "OR");
 

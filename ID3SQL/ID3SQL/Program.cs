@@ -18,7 +18,11 @@ namespace ID3SQL
 
         private static string DefaultDirectoryPath()
         {
+#if DEBUG
+            return @"C:\Temp\";
+#else
             return Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+#endif
         }
 
         public static void Main(string[] args)
