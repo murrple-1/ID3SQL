@@ -70,10 +70,6 @@ namespace ID3SQL
 
                     executionPlan.Invoke(tagFilePaths, executionPlanOptions);
                 }
-                else
-                {
-                    Console.Write(options.GetUsage());
-                }
             }
             catch(ID3SQLException ex)
             {

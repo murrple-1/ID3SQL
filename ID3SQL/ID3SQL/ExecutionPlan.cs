@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualBasic.FileIO;
-
 using Irony.Parsing;
 
 using TagLib;
@@ -713,7 +711,7 @@ namespace ID3SQL
                 {
                     if(!executionPlanOptions.DryRun)
                     {
-                        FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        SHFileOperationWrapper.DeleteFileOrFolder(filePath);
                     }
 
                     if(executionPlanOptions.Verbose)

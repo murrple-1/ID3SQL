@@ -49,7 +49,7 @@ namespace ID3SQL
         {
             Terminal numberTerm = new NumberLiteral(NumberTermName);
             Terminal stringLiteralTerm = new StringLiteral(StringLiteralTermName, "'", StringOptions.AllowsDoubledQuote);
-            Terminal idTerm = TerminalFactory.CreateSqlExtIdentifier(this, IdTermName); //covers normal identifiers (abc) and quoted id's ([abc d], "abc d")
+            Terminal idTerm = TerminalFactory.CreateSqlExtIdentifier(this, IdTermName);
 
             NonTerminal statementNonTerm = new NonTerminal(StatementNonTermName);
             NonTerminal selectStatementNonTerm = new NonTerminal(SelectStatementNonTermName);

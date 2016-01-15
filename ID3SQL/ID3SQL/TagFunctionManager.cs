@@ -39,8 +39,6 @@ namespace ID3SQL
             {
                 return _GetFunctions.Values;
             }
-            
-            
         }
 
         private static readonly IDictionary<string, Func<File, string, object>> _GetFunctions = new Dictionary<string, Func<File, string, object>>()
@@ -276,339 +274,197 @@ namespace ID3SQL
                 "Album",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Album = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Album = ValueToString(value);
                 }
             },
             {
                 "AlbumArtists",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.AlbumArtists = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.AlbumArtists = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.AlbumArtists = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "AlbumArtistsSort",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.AlbumArtistsSort = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.AlbumArtistsSort = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.AlbumArtistsSort = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "AlbumSort",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Album = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.AlbumSort = ValueToString(value);
                 }
             },
             {
                 "BeatsPerMinute",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(IsNumeric(value))
-                    {
-                        file.Tag.BeatsPerMinute = Convert.ToUInt32(value);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.BeatsPerMinute = ValueToUInt(value);
                 }
             },
             {
                 "Comment",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Comment = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Comment = ValueToString(value);
                 }
             },
             {
                 "Composers",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.Composers = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.Composers = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Composers = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "ComposersSort",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.ComposersSort = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.ComposersSort = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.ComposersSort = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "Conductor",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Conductor = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Conductor = ValueToString(value);
                 }
             },
             {
                 "Copyright",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Copyright = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Copyright = ValueToString(value);
                 }
             },
             {
                 "Disc",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(IsNumeric(value))
-                    {
-                        file.Tag.Disc = Convert.ToUInt32(value);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Disc = ValueToUInt(value);
                 }
             },
             {
                 "DiscCount",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(IsNumeric(value))
-                    {
-                        file.Tag.DiscCount = Convert.ToUInt32(value);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.DiscCount = ValueToUInt(value);
                 }
             },
             {
                 "Genres",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.Genres = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.Genres = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Genres = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "Grouping",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Grouping = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Grouping = ValueToString(value);
                 }
             },
             {
                 "Lyrics",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Lyrics = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Lyrics = ValueToString(value);
                 }
             },
             {
                 "Performers",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.Performers = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.Performers = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Performers = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "PerformersSort",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is IEnumerable<string>)
-                    {
-                        file.Tag.PerformersSort = (value as IEnumerable<string>).ToArray();
-                    }
-                    else if(value is string)
-                    {
-                        file.Tag.PerformersSort = (value as string).Split(executionPlanOptions.StringArraySeparator);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.PerformersSort = ValueToStringArray(value, executionPlanOptions);
                 }
             },
             {
                 "Title",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.Title = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Title = ValueToString(value);
                 }
             },
             {
                 "TitleSort",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(value is string)
-                    {
-                        file.Tag.TitleSort = value as string;
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.TitleSort = ValueToString(value);
                 }
             },
             {
                 "Track",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(IsNumeric(value))
-                    {
-                        file.Tag.Track = Convert.ToUInt32(value);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Track = ValueToUInt(value);
                 }
             },
             {
                 "TrackCount",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(IsNumeric(value))
-                    {
-                        file.Tag.TrackCount = Convert.ToUInt32(value);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.TrackCount = ValueToUInt(value);
                 }
             },
             {
                 "Year",
                 (value, file, executionPlanOptions) =>
                 {
-                    if(IsNumeric(value))
-                    {
-                        file.Tag.Year = Convert.ToUInt32(value);
-                    }
-                    else
-                    {
-                        throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
-                    }
+                    file.Tag.Year = ValueToUInt(value);
                 }
             }
         };
+
+        private static string ValueToString(object value)
+        {
+            if (value is string)
+            {
+                return value as string;
+            }
+            else
+            {
+                throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
+            }
+        }
+
+        private static string[] ValueToStringArray(object value, ExecutionPlanOptions executionPlanOptions)
+        {
+            if (value is IEnumerable<string>)
+            {
+                return (value as IEnumerable<string>).ToArray();
+            }
+            else if (value is string)
+            {
+                return (value as string).Split(executionPlanOptions.StringArraySeparator);
+            }
+            else
+            {
+                throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
+            }
+        }
+
+        private static uint ValueToUInt(object value)
+        {
+            if (IsNumeric(value))
+            {
+                return Convert.ToUInt32(value);
+            }
+            else
+            {
+                throw new ID3SQLException(string.Format("Invalid Assignment: {0}", value));
+            }
+        }
 
         private static bool IsNumeric(object value)
         {
