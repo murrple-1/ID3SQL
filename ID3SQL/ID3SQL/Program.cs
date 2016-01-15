@@ -63,7 +63,9 @@ namespace ID3SQL
                     {
                         Recycle = options.Recycle,
                         DryRun = options.DryRun,
-                        Verbose = options.Verbose
+                        Verbose = options.Verbose,
+                        StringArraySeparator = options.StringLiteralSeparator,
+                        RegexIgnoreCase = options.RegexIgnoreCase
                     };
 
                     executionPlan.Invoke(tagFilePaths, executionPlanOptions);

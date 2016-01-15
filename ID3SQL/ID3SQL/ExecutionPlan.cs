@@ -66,12 +66,14 @@ namespace ID3SQL
             {
                 case ID3SQLGrammar.SelectStatementNonTermName:
                     {
-                        action = ToSelectAction();
+                        ParseTreeNode selectListNode = rootNode.ChildNodes[1];
+                        action = ToSelectAction(selectListNode);
                         break;
                     }
                 case ID3SQLGrammar.UpdateStatementNonTermName:
                     {
-                        action = ToUpdateAction();
+                        ParseTreeNode assignListNode = rootNode.ChildNodes[2];
+                        action = ToUpdateAction(assignListNode);
                         break;
                     }
                 case ID3SQLGrammar.DeleteStatementNonTermName:
@@ -165,10 +167,10 @@ namespace ID3SQL
                     }
                 case ID3SQLGrammar.StringLiteralTermName:
                     {
-                        string str = node.Token.Text;
+                        string str = node.Token.Value as string;
                         expressionFn = (file, filePath, executionPlanOptions) =>
                         {
-                            return Convert.ToBoolean(str);
+                            return str;
                         };
                         break;
                     }
@@ -276,6 +278,20 @@ namespace ID3SQL
 
                                                 return number1 == number2;
                                             }
+                                            else if(obj1 is IEnumerable<string> && obj2 is string)
+                                            {
+                                                string[] strList1 = (obj1 as IEnumerable<string>).ToArray();
+                                                string[] strList2 = (obj2 as string).Split(executionPlanOptions.StringArraySeparator);
+
+                                                return strList1.SequenceEqual(strList2);
+                                            }
+                                            else if(obj1 is string && obj2 is IEnumerable<string>)
+                                            {
+                                                string[] strList1 = (obj1 as string).Split(executionPlanOptions.StringArraySeparator);
+                                                string[] strList2 = (obj2 as IEnumerable<string>).ToArray();
+
+                                                return strList1.SequenceEqual(strList2);
+                                            }
                                             else
                                             {
                                                 return obj1 == obj2 || object.Equals(obj1, obj2);
@@ -366,7 +382,31 @@ namespace ID3SQL
                                             object obj1 = expressionFn1(file, filePath, executionPlanOptions);
                                             object obj2 = expressionFn2(file, filePath, executionPlanOptions);
 
-                                            return obj1 != obj2 && !object.Equals(obj1, obj2);
+                                            if (IsNumeric(obj1) && IsNumeric(obj2))
+                                            {
+                                                decimal number1 = Convert.ToDecimal(obj1);
+                                                decimal number2 = Convert.ToDecimal(obj2);
+
+                                                return number1 != number2;
+                                            }
+                                            else if (obj1 is IEnumerable<string> && obj2 is string)
+                                            {
+                                                string[] strList1 = (obj1 as IEnumerable<string>).ToArray();
+                                                string[] strList2 = (obj2 as string).Split(executionPlanOptions.StringArraySeparator);
+
+                                                return !strList1.SequenceEqual(strList2);
+                                            }
+                                            else if (obj1 is string && obj2 is IEnumerable<string>)
+                                            {
+                                                string[] strList1 = (obj1 as string).Split(executionPlanOptions.StringArraySeparator);
+                                                string[] strList2 = (obj2 as IEnumerable<string>).ToArray();
+
+                                                return !strList1.SequenceEqual(strList2);
+                                            }
+                                            else
+                                            {
+                                                return obj1 != obj2 && !object.Equals(obj1, obj2);
+                                            }
                                         };
                                         break;
                                     }
@@ -413,7 +453,7 @@ namespace ID3SQL
                                                 throw new Exception("Cannot compare non-strings");
                                             }
 
-                                            Regex regex = new Regex(str2);
+                                            Regex regex = new Regex(str2, executionPlanOptions.RegexIgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
 
                                             return regex.IsMatch(str1);
                                         };
@@ -426,13 +466,22 @@ namespace ID3SQL
                                             object obj1 = expressionFn1(file, filePath, executionPlanOptions);
                                             object obj2 = expressionFn2(file, filePath, executionPlanOptions);
 
-                                            IEnumerable<object> collection = obj2 as IEnumerable<object>;
-                                            if (collection == null)
+                                            if(obj1 is string && obj2 is string)
+                                            {
+                                                string str = obj1 as string;
+                                                string[] collection = (obj2 as string).Split(executionPlanOptions.StringArraySeparator);
+
+                                                return collection.Contains(str);
+                                            }
+                                            else if(obj2 is IEnumerable<object>)
+                                            {
+                                                IEnumerable<object> collection = obj2 as IEnumerable<object>;
+                                                return collection.Contains(obj1);
+                                            }
+                                            else
                                             {
                                                 throw new Exception("Cannot compare non-enumerables");
                                             }
-
-                                            return collection.Contains(obj1);
                                         };
                                         break;
                                     }
@@ -466,7 +515,7 @@ namespace ID3SQL
                                                 throw new Exception("Cannot compare non-strings");
                                             }
 
-                                            Regex regex = new Regex(str2);
+                                            Regex regex = new Regex(str2, executionPlanOptions.RegexIgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
 
                                             return !regex.IsMatch(str1);
                                         };
@@ -479,13 +528,22 @@ namespace ID3SQL
                                             object obj1 = expressionFn1(file, filePath, executionPlanOptions);
                                             object obj2 = expressionFn2(file, filePath, executionPlanOptions);
 
-                                            IEnumerable<object> collection = obj2 as IEnumerable<object>;
-                                            if (collection == null)
+                                            if (obj1 is string && obj2 is string)
+                                            {
+                                                string str = obj1 as string;
+                                                string[] collection = (obj2 as string).Split(executionPlanOptions.StringArraySeparator);
+
+                                                return !collection.Contains(str);
+                                            }
+                                            else if (obj2 is IEnumerable<object>)
+                                            {
+                                                IEnumerable<object> collection = obj2 as IEnumerable<object>;
+                                                return !collection.Contains(obj1);
+                                            }
+                                            else
                                             {
                                                 throw new Exception("Cannot compare non-enumerables");
                                             }
-
-                                            return !collection.Contains(obj1);
                                         };
                                         break;
                                     }
@@ -525,22 +583,124 @@ namespace ID3SQL
             || value is decimal;
         }
 
-        private static Action<File, string, ExecutionPlanOptions> ToSelectAction()
+        private static Action<File, string, ExecutionPlanOptions> ToSelectAction(ParseTreeNode selectListNode)
         {
-            // TODO actual implementation
-            Action<File, string, ExecutionPlanOptions> action = (file, filePath, executionPlanOptions) =>
+            Action<File, string, ExecutionPlanOptions> action;
+            ParseTreeNode topNode = selectListNode.ChildNodes[0];
+            if(topNode.Token != null && string.Equals(topNode.Token.Text, "*"))
             {
+                IEnumerable<Func<File, string, object>> allGetFunctions = TagFunctionManager.AllGetFunctions();
+                action = (file, filePath, executionPlanOptions) =>
+                {
+                    string[] propertyValues = allGetFunctions.Select(getFn => ToPrettyString(getFn(file, filePath))).ToArray();
+                    string fileLine = string.Join("\t", propertyValues);
 
-            };
+                    Console.WriteLine(fileLine);
+                };
+            }
+            else if(topNode.ChildNodes.Count > 0)
+            {
+                ICollection<Func<File, string, object>> getFunctions = new List<Func<File, string, object>>();
+                foreach (ParseTreeNode idNode in topNode.ChildNodes)
+                {
+                    string propertyName = idNode.Token.Text;
+                    Func<File, string, object> getFn = TagFunctionManager.GetFunction(propertyName);
+                    if(getFn != null)
+                    {
+                        getFunctions.Add(getFn);
+                    }
+                    else
+                    {
+                        throw new ID3SQLException("Unknown property name in select list");
+                    }
+                }
+                action = (file, filePath, executionPlanOptions) =>
+                {
+                    string[] propertyValues = getFunctions.Select(getFn => ToPrettyString(getFn(file, filePath))).ToArray();
+                    string fileLine = string.Join("\t", propertyValues);
+
+                    Console.WriteLine(fileLine);
+                };
+            }
+            else
+            {
+                throw new Exception("Unknown select non-term");
+            }
+            
             return action;
         }
 
-        private static Action<File, string, ExecutionPlanOptions> ToUpdateAction()
+        private static string ToPrettyString(object obj)
         {
-            // TODO actual implementation
+            // TODO do this better?
+            return obj.ToString();
+        }
+
+        private static Action<File, string, ExecutionPlanOptions> ToUpdateAction(ParseTreeNode assignListNode)
+        {
+            IDictionary<string, Action<File, string, ExecutionPlanOptions>> subActions = new Dictionary<string, Action<File, string, ExecutionPlanOptions>>();
+            foreach(ParseTreeNode assignmentNode in assignListNode.ChildNodes)
+            {
+                ParseTreeNode idNode = assignmentNode.ChildNodes[0];
+                ParseTreeNode expressionNode = assignmentNode.ChildNodes[2];
+
+                string propertyName = idNode.Token.Text;
+                Action<object, File, ExecutionPlanOptions> setFn = TagFunctionManager.SetFunction(propertyName);
+                if(setFn != null)
+                {
+                    Func<File, string, ExecutionPlanOptions, object> expressionFn = ToExpressionFunc(expressionNode);
+                    Action<File, string, ExecutionPlanOptions> subAction = (file, filePath, executionPlanOptions) =>
+                    {
+                        setFn(expressionFn(file, filePath, executionPlanOptions), file, executionPlanOptions);
+                    };
+                    subActions.Add(propertyName, subAction);
+                }
+                else
+                {
+                    throw new ID3SQLException("Unknown ID to update");
+                }
+            }
+
             Action<File, string, ExecutionPlanOptions> action = (file, filePath, executionPlanOptions) =>
             {
+                if (executionPlanOptions.Verbose)
+                {
+                    Console.WriteLine(string.Format(string.Format("Updating {0}...", filePath)));
+                }
 
+                try
+                {
+                    foreach (KeyValuePair<string, Action<File, string, ExecutionPlanOptions>> subActionPair in subActions)
+                    {
+                        Action<File, string, ExecutionPlanOptions> subAction = subActionPair.Value;
+                        subAction(file, filePath, executionPlanOptions);
+
+                        if (executionPlanOptions.Verbose)
+                        {
+                            Console.WriteLine(string.Format("\tUpdating {0} for file {1}", subActionPair.Key, filePath));
+                        }
+                    }
+
+                    if (subActions.Count > 0)
+                    {
+                        file.Save();
+
+                        if (executionPlanOptions.Verbose)
+                        {
+                            Console.WriteLine(string.Format("Save successed for {0}", filePath));
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(string.Format("Failed to write {0}", filePath));
+
+                    if(executionPlanOptions.Verbose)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                }
+                
             };
             return action;
         }
