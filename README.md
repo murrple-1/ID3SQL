@@ -74,7 +74,6 @@ Available in SELECT property lists and WHERE clauses
 
 | Property Name          | Type               |
 | ---------------------- | ------------------ |
-| `FilePath`             | `string`           |
 | `Album`                | `string`           |
 | `AlbumArtists`         | `string array`     |
 | `AlbumArtistsSort`     | `string array`     |
