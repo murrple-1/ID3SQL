@@ -21,6 +21,21 @@ namespace ID3SQL
             }
         }
 
+        public static IEnumerable<string> AllGetFunctionPropertyNames(Comparison<string> comparison = null)
+        {
+            if (comparison != null)
+            {
+                List<string> keys = _GetFunctions.Keys.ToList();
+                keys.Sort(comparison);
+
+                return keys;
+            }
+            else
+            {
+                return _GetFunctions.OrderBy(kvp => kvp.Key).Select(kvp => kvp.Key);
+            }
+        }
+
         public static IEnumerable<Func<File, string, object>> AllGetFunctions(Comparison<string> comparison = null)
         {
             if(comparison != null)
@@ -37,7 +52,7 @@ namespace ID3SQL
             }
             else
             {
-                return _GetFunctions.Values;
+                return _GetFunctions.OrderBy(kvp => kvp.Key).Select(kvp => kvp.Value);
             }
         }
 

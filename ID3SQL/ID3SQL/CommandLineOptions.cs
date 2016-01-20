@@ -34,6 +34,12 @@ namespace ID3SQL
         [Option('l', "ignoreCaseRegex", HelpText = "Sets whether the where-clause \"LIKE\" regex should ignore case", DefaultValue = true)]
         public bool RegexIgnoreCase { get; set; }
 
+        [Option('c', "--columnNames", HelpText = "", DefaultValue = true)]
+        public bool ColumnNames { get; set; }
+
+        [Option('l', "--columnSeparator", HelpText = "", DefaultValue = "\t|\t")]
+        public string ColumnSeparator { get; set; }
+
         [HelpOption]
         public string GetUsage()
         {

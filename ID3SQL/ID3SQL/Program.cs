@@ -47,6 +47,11 @@ namespace ID3SQL
 
                     string statement = options.Statement;
 
+                    if(statement == null)
+                    {
+                        throw new ID3SQLException("No SQL statement supplied");
+                    }
+
                     Action<IEnumerable<string>, ExecutionPlanOptions> executionPlan = ExecutionPlan.GenerateExecutionPlan(statement);
 
                     ICollection<string> tagFilePaths = new List<string>();
@@ -65,7 +70,9 @@ namespace ID3SQL
                         DryRun = options.DryRun,
                         Verbose = options.Verbose,
                         StringArraySeparator = options.StringLiteralSeparator,
-                        RegexIgnoreCase = options.RegexIgnoreCase
+                        RegexIgnoreCase = options.RegexIgnoreCase,
+                        ColumnNames = options.ColumnNames,
+                        ColumnSeparator = options.ColumnSeparator
                     };
 
                     executionPlan.Invoke(tagFilePaths, executionPlanOptions);

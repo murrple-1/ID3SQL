@@ -20,14 +20,19 @@ namespace ID3SQL
                 throw new ID3SQLException("Unable to parse statement");
             }
 
-#if DEBUG
-            PrintParseTree(rootNode, 0);
-#endif
 
+
+            Action<ExecutionPlanOptions> preActionFn = ToPreAction(rootNode);
+            Action<ExecutionPlanOptions> postActionFn = ToPostAction(rootNode);
             Action<File, string, ExecutionPlanOptions> actionFn = ToAction(rootNode);
             Func<File, string, ExecutionPlanOptions, bool> whereExecutionFn = ToWhereFunc(rootNode);
 
             return (filePaths, executionPlanOptions) => {
+                if(preActionFn != null)
+                {
+                    preActionFn(executionPlanOptions);
+                }
+
                 foreach(string filePath in filePaths)
                 {
                     using (File tagFile = File.Create(filePath))
@@ -37,6 +42,11 @@ namespace ID3SQL
                             actionFn(tagFile, filePath, executionPlanOptions);
                         }
                     }
+                }
+
+                if(postActionFn != null)
+                {
+                    postActionFn(executionPlanOptions);
                 }
             };
         }
@@ -56,6 +66,81 @@ namespace ID3SQL
             }
         }
 #endif
+
+        private static void PrintColumnNames(ParseTreeNode rootNode, ExecutionPlanOptions executionPlanOptions)
+        {
+            if(string.Equals(ID3SQLGrammar.SelectStatementNonTermName, rootNode.Term.Name))
+            {
+                ParseTreeNode selectListNode = rootNode.ChildNodes[1];
+                ParseTreeNode topNode = selectListNode.ChildNodes[0];
+                if (topNode.Token != null && string.Equals(topNode.Token.Text, "*"))
+                {
+                    string[] allGetFunctionPropertyNames = TagFunctionManager.AllGetFunctionPropertyNames().ToArray();
+                    string columnNameLine = string.Join(executionPlanOptions.ColumnSeparator, allGetFunctionPropertyNames);
+
+                    Console.WriteLine(columnNameLine);
+                }
+                else if (topNode.ChildNodes.Count > 0)
+                {
+                    IEnumerable<string> allGetFunctionPropertyNames = TagFunctionManager.AllGetFunctionPropertyNames();
+                    ICollection<string> propertyNames = new List<string>();
+                    foreach (ParseTreeNode idNode in topNode.ChildNodes)
+                    {
+                        string propertyName = idNode.Token.Text;
+                        if (allGetFunctionPropertyNames.Contains(propertyName))
+                        {
+                            propertyNames.Add(propertyName);
+                        }
+                        else
+                        {
+                            throw new ID3SQLException("Unknown property name in select list");
+                        }
+                    }
+
+                    string columnNameLine = string.Join(executionPlanOptions.ColumnSeparator, propertyNames);
+
+                    Console.WriteLine(columnNameLine);
+                }
+                else
+                {
+                    throw new Exception("Unknown select non-term");
+                }
+            }
+        }
+
+        private static Action<ExecutionPlanOptions> ToPreAction(ParseTreeNode rootNode)
+        {
+            ICollection<Action<ExecutionPlanOptions>> preActions = new List<Action<ExecutionPlanOptions>>();
+
+#if DEBUG
+            preActions.Add((executionPlanOptions) =>
+            {
+                PrintParseTree(rootNode, 0);
+            });
+#endif
+
+            preActions.Add((executionPlanOptions) =>
+            {
+                if(executionPlanOptions.ColumnNames)
+                {
+                    PrintColumnNames(rootNode, executionPlanOptions);
+                }
+            });
+
+            return (executionPlanOptions) =>
+            {
+                foreach(Action<ExecutionPlanOptions> preAction in preActions)
+                {
+                    preAction(executionPlanOptions);
+                }
+            };
+        }
+
+        private static Action<ExecutionPlanOptions> ToPostAction(ParseTreeNode rootNode)
+        {
+            // This is currently a stub, as there are no post actions defined
+            return null;
+        }
 
         private static Action<File, string, ExecutionPlanOptions> ToAction(ParseTreeNode rootNode)
         {
@@ -591,7 +676,7 @@ namespace ID3SQL
                 action = (file, filePath, executionPlanOptions) =>
                 {
                     string[] propertyValues = allGetFunctions.Select(getFn => ToPrettyString(getFn(file, filePath))).ToArray();
-                    string fileLine = string.Join("\t", propertyValues);
+                    string fileLine = string.Join(executionPlanOptions.ColumnSeparator, propertyValues);
 
                     Console.WriteLine(fileLine);
                 };
@@ -615,7 +700,7 @@ namespace ID3SQL
                 action = (file, filePath, executionPlanOptions) =>
                 {
                     string[] propertyValues = getFunctions.Select(getFn => ToPrettyString(getFn(file, filePath))).ToArray();
-                    string fileLine = string.Join("\t", propertyValues);
+                    string fileLine = string.Join(executionPlanOptions.ColumnSeparator, propertyValues);
 
                     Console.WriteLine(fileLine);
                 };
@@ -631,7 +716,20 @@ namespace ID3SQL
         private static string ToPrettyString(object obj)
         {
             // TODO do this better?
-            return obj.ToString();
+            if(obj == null)
+            {
+                return "NULL";
+            }
+            else if(obj is IEnumerable<string>)
+            {
+                IEnumerable<string> _obj = obj as IEnumerable<string>;
+
+                return string.Join(",", _obj);
+            }
+            else
+            {
+                return obj.ToString();
+            }
         }
 
         private static Action<File, string, ExecutionPlanOptions> ToUpdateAction(ParseTreeNode assignListNode)
