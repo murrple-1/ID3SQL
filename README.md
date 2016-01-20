@@ -65,4 +65,72 @@ Updates all files, setting Disc to 1 and Disc Count to 2
 Updates files where the Lyrics contain the phrase 'rhythm' and the Year is 2000 or higher, setting the Grouping to 'Rap' and 'Gangsta Rap'
 
 ### Note
-UPDATE statements support updating a subset of the available tags. Namely, any of the tags of the form 'First...' cannot be updated, since they are just convience methods accessing an array underneith
+UPDATE statements support updating a subset of the available tags. Namely, any of the tags of the form 'First...' cannot be updated, since they are just convience methods accessing an array underneath
+
+# Tags Available
+## Getters
+
+Available in SELECT property lists and WHERE clauses
+
+| Property Name          | Type               |
+| ---------------------- | ------------------ |
+| `FilePath`             | `string`           |
+| `Album`                | `string`           |
+| `AlbumArtists`         | `string array`     |
+| `AlbumArtistsSort`     | `string array`     |
+| `AlbumSort`            | `string`           |
+| `BeatsPerMinute`       | `unsigned integer` |
+| `Comment`              | `string`           |
+| `Composers`            | `string array`     |
+| `ComposersSort`        | `string array`     |
+| `Conductor`            | `string`           |
+| `Copyright`            | `string`           |
+| `Disc`                 | `unsigned integer` |
+| `DiscCount`            | `unsigned integer` |
+| `FirstAlbumArtist`     | `string`           |
+| `FirstAlbumArtistSort` | `string`           |
+| `FirstComposer`        | `string`           |
+| `FirstComposerSort`    | `string`           |
+| `FirstGenre`           | `string`           |
+| `FirstPerformer`       | `string`           |
+| `FirstPerformerSort`   | `string`           |
+| `Genres`               | `string array`     |
+| `Grouping`             | `string`           |
+| `Lyrics`               | `string`           |
+| `Performers`           | `string array`     |
+| `PerformersSort`       | `string array`     |
+| `Title`                | `string`           |
+| `TitleSort`            | `string`           |
+| `Track`                | `unsigned integer` |
+| `TrackCount`           | `unsigned integer` |
+| `Year`                 | `unsigned integer` |
+
+## Setters
+
+Available to SET clauses
+
+| Property Name          | Type               |
+| ---------------------- | ------------------ |
+| `FilePath`             | `string`           |
+| `Album`                | `string`           |
+| `AlbumArtists`         | `string array`     |
+| `AlbumArtistsSort`     | `string array`     |
+| `AlbumSort`            | `string`           |
+| `BeatsPerMinute`       | `unsigned integer` |
+| `Comment`              | `string`           |
+| `Composers`            | `string array`     |
+| `ComposersSort`        | `string array`     |
+| `Conductor`            | `string`           |
+| `Copyright`            | `string`           |
+| `Disc`                 | `unsigned integer` |
+| `DiscCount`            | `unsigned integer` |
+| `Genres`               | `string array`     |
+| `Grouping`             | `string`           |
+| `Lyrics`               | `string`           |
+| `Performers`           | `string array`     |
+| `PerformersSort`       | `string array`     |
+| `Title`                | `string`           |
+| `TitleSort`            | `string`           |
+| `Track`                | `unsigned integer` |
+| `TrackCount`           | `unsigned integer` |
+| `Year`                 | `unsigned integer` |
