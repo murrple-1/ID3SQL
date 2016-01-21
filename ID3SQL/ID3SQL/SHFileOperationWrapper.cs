@@ -33,11 +33,18 @@ namespace ID3SQL
 
         public static void DeleteFileOrFolder(string path)
         {
-            SHFILEOPSTRUCT fileop = new SHFILEOPSTRUCT();
-            fileop.wFunc = FO_DELETE;
-            fileop.pFrom = path + '\0' + '\0';
-            fileop.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION;
-            SHFileOperation(ref fileop);
+            try
+            {
+                SHFILEOPSTRUCT fileop = new SHFILEOPSTRUCT();
+                fileop.wFunc = FO_DELETE;
+                fileop.pFrom = path + '\0' + '\0';
+                fileop.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION;
+                SHFileOperation(ref fileop);
+            }
+            catch(Exception ex)
+            {
+                throw new ID3SQLException("Recycle option not available on this system", ex);
+            }
         }
     }
 }
