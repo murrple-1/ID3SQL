@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Collections.Generic;
 
 using CommandLine;
 using CommandLine.Text;
@@ -43,7 +45,33 @@ namespace ID3SQL
         [HelpOption]
         public string GetUsage()
         {
-            return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current)));
+
+            sb.AppendLine();
+            sb.AppendLine("Available Getters");
+            sb.AppendLine();
+
+            IEnumerable<string> getterPropertyNames = TagFunctionManager.AllGetFunctionPropertyNames();
+            foreach(string getterPropertyName in getterPropertyNames)
+            {
+                sb.AppendLine(getterPropertyName);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("Available Setters");
+            sb.AppendLine();
+
+            IEnumerable<string> setterPropertyNames = TagFunctionManager.AllSetFunctionPropertyNames();
+            foreach(string setterPropertyName in setterPropertyNames)
+            {
+                sb.AppendLine(setterPropertyName);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("Getter and Setter Property names are case-sensitive");
+
+            return sb.ToString();
         }
     }
 }

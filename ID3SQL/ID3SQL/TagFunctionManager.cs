@@ -283,6 +283,21 @@ namespace ID3SQL
             }
         }
 
+        public static IEnumerable<string> AllSetFunctionPropertyNames(Comparison<string> comparison = null)
+        {
+            if (comparison != null)
+            {
+                List<string> keys = _SetFunctions.Keys.ToList();
+                keys.Sort(comparison);
+
+                return keys;
+            }
+            else
+            {
+                return _SetFunctions.OrderBy(kvp => kvp.Key).Select(kvp => kvp.Key);
+            }
+        }
+
         private static readonly IDictionary<string, Action<object, File, ExecutionPlanOptions>> _SetFunctions = new Dictionary<string, Action<object, File, ExecutionPlanOptions>>()
         {
             {

@@ -61,7 +61,7 @@ namespace ID3SQL
                     }
                     catch(Exception ex)
                     {
-                        throw new ID3SQLException(string.Format("Error building file list from startDirectory '{0}'", startDirectory), ex);
+                        throw new ID3SQLException(string.Format("Error building file list from start directory '{0}'", startDirectory), ex);
                     }
 
                     ExecutionPlanOptions executionPlanOptions = new ExecutionPlanOptions()
@@ -75,23 +75,23 @@ namespace ID3SQL
                         ColumnSeparator = options.ColumnSeparator
                     };
 
-                    executionPlan.Invoke(tagFilePaths, executionPlanOptions);
+                    executionPlan(tagFilePaths, executionPlanOptions);
                 }
             }
             catch(ID3SQLException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.Message);
                 if(options.Verbose)
                 {
-                    Console.Write(ex);
+                    Console.Error.Write(ex);
                 }
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Unknown error has occured");
+                Console.Error.WriteLine("Unknown error has occured");
                 if(options.Verbose)
                 {
-                    Console.WriteLine(ex);
+                    Console.Error.WriteLine(ex);
                 }
             }
         }

@@ -56,9 +56,10 @@ namespace ID3SQL
         {
             for(int i = 0; i < level; i++)
             {
-                Console.Write('\t');
+                Console.Error.Write('\t');
             }
-            Console.WriteLine(parseTreeNode);
+
+            Console.Error.WriteLine(parseTreeNode);
 
             foreach(ParseTreeNode childNode in parseTreeNode.ChildNodes)
             {
@@ -232,6 +233,10 @@ namespace ID3SQL
                     {
                         string propertyName = node.Token.Text;
                         Func<File, string, object>  getFn = TagFunctionManager.GetFunction(propertyName);
+                        if(getFn == null)
+                        {
+                            throw new ID3SQLException(string.Format("Unknown property name in expression: {0}", propertyName));
+                        }
                         expressionFn = (file, filePath, executionPlanOptions) =>
                         {
                             return getFn(file, filePath);
@@ -694,7 +699,7 @@ namespace ID3SQL
                     }
                     else
                     {
-                        throw new ID3SQLException("Unknown property name in select list");
+                        throw new ID3SQLException(string.Format("Unknown property name in select list: {0}", propertyName));
                     }
                 }
                 action = (file, filePath, executionPlanOptions) =>
@@ -789,11 +794,11 @@ namespace ID3SQL
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine(string.Format("Failed to write {0}", filePath));
+                    Console.Error.WriteLine(string.Format("Failed to write {0}", filePath));
 
                     if(executionPlanOptions.Verbose)
                     {
-                        Console.WriteLine(ex);
+                        Console.Error.WriteLine(ex);
                     }
                 }
                 
