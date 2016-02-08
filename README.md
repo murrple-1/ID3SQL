@@ -64,8 +64,9 @@ Updates all files, setting Disc to 1 and Disc Count to 2
 
 Updates files where the Lyrics contain the phrase 'rhythm' and the Year is 2000 or higher, setting the Grouping to 'Rap' and 'Gangsta Rap'
 
-### Note
-UPDATE statements support updating a subset of the available tags. Namely, any of the tags of the form 'First...' cannot be updated, since they are just convience methods accessing an array underneath
+    ID3SQL.exe -s "&" "UPDATE SET Genres = 'Rap&Gangsta Rap' WHERE Lyrics LIKE '.* rhythm .*' AND Year >= 2000"
+
+Same as above, just demonstrating the String Literal Separator.
 
 # Tags Available
 ## Getters
