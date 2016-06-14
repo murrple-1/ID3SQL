@@ -20,8 +20,6 @@ namespace ID3SQL
                 throw new ID3SQLException("Unable to parse statement");
             }
 
-
-
             Action<ExecutionPlanOptions> preActionFn = ToPreAction(rootNode);
             Action<ExecutionPlanOptions> postActionFn = ToPostAction(rootNode);
             Action<File, string, ExecutionPlanOptions> actionFn = ToAction(rootNode);
@@ -801,7 +799,6 @@ namespace ID3SQL
                         Console.Error.WriteLine(ex);
                     }
                 }
-                
             };
             return action;
         }
