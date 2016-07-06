@@ -25,9 +25,9 @@ This searching mechanism is much more comprehensive than many media managers, li
 
   -l, --ignoreCaseRegex           (Default: True) Sets whether the where-clause "LIKE" regex should ignore case
 
-  -c, ----columnNames             (Default: True) When running SELECT statements, flags whether to print the column names as the first line
+  -c, --columnNames             (Default: True) When running SELECT statements, flags whether to print the column names as the first line
 
-  -l, ----columnSeparator         (Default:     |       ) When running SELECT statements, the string given here will be the glue between each column. Usually a variation of the pipe-character
+  -l, --columnSeparator         (Default:     |       ) When running SELECT statements, the string given here will be the glue between each column. Usually a variation of the pipe-character
 
   --help                          Display the help screen.
 ```
